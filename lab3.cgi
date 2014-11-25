@@ -7,7 +7,7 @@ use CGI::Carp qw(fatalsToBrowser);
 use lab3::st01::st01;
 use lab3::st05::st05;
 use lab3::st08::st08;
-use lab3::st08::st08;
+use lab3::st10::st10;
 my @MODULES = 
 (
 	\&ST01::st01, 
