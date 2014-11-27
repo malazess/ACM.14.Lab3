@@ -5,6 +5,8 @@ use strict;
 use DBI;
 use Text::Iconv;
 
+use constant API_KEY => '0add42399f47c5125b45b292b8efb2b4';
+
 my $dsn = 'DBI:mysql:lab3:localhost'; # ‘®¥¤¨­¥­¨¥ á ¡ §®©
 my $db_user_name = 'perl_lab';
 my $db_password = '1234';
@@ -44,7 +46,8 @@ my %ACTIONS =
 	'edit' => \&edit,
 	'remove' => \&remove,
 	'list' => \&list,
-	'import_dbm' => \&import_dbm
+	'import_dbm' => \&import_dbm,
+	'export' => \&export
 );
 
 sub list
@@ -290,6 +293,34 @@ sub import_dbm
     }
     
     print $q->redirect($global->{selfurl} . '?student=' . $studentId);
+}
+
+sub export
+{
+    my ($q, $global) = @_;
+    
+    print $q->header('Content-type: text/html; charset=cp866');
+    
+    my $key = $q->param('API_KEY');
+    if($key != API_KEY) {
+        die "Access denied.";
+    }
+    
+    my %obj = (
+        'type' => 'default'
+    );
+    
+    my $sth = $dbh->prepare('INSERT INTO st10_object(`type`, date_added) VALUES (?, NOW())');
+    $sth->execute($obj{'type'});
+    my $id = $sth->{'mysql_insertid'};
+    
+    foreach my $key (values $attributes{$obj{'type'}}) {
+        my $value = $q->param('field_' . $key);
+        $obj{$key} = $value;
+        $dbh->prepare('INSERT INTO st10_object_property(object_id, code, value) VALUES(?, ?, ?)')->execute($id, $key, $value);
+    }
+    
+    print 'OK';
 }
 
 sub get_objects
